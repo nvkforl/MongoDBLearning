@@ -1,0 +1,87 @@
+mongoDB database 
+    |
+    -> self-managed / enterprise -> cloud manager / ops manager
+    |
+    -> Atlas cloud
+    |
+    -> Mobile
+
+
+
+it has as GUI
+    1. compass
+    2. BI Connector
+    3. mongoDB charts
+
+it has STITCH
+    1. Serverless Query API
+    2. Serverless Function
+    3. database triggers
+    4. Real-Time Sync
+
+
+1. Making a customized location to start a mongoDB
+    $ mkdir /data/db
+
+2. stopping the running mongoDB
+    $ pkill mongod
+
+3. starting the mongoDB from /data/db
+    $ mongod --dbpath "/data/db" 
+        note : if not working add sudo
+
+    starting with diffrent port
+    $ mongod --port 27018 --dbpath "/data/db" 
+
+4. open a new teminal and login to mongo shell by
+    $ mongo
+
+    if you are starting in a diffrent port then use
+    $ mongo --port 27018
+
+5.  for listing the exisiting DBs
+    > show dbs 
+        admin   0.000GB
+        config  0.000GB
+        local   0.000GB
+
+6. create a callection on the go
+    > use shop
+        switched to db shop
+
+7. insert a record in a product
+    > db.products.insertOne({name:"A Book",price:12.99})
+        {
+	        "acknowledged" : true,
+	        "insertedId" : ObjectId("60a9feb24ac1fc47e810ff24")
+        }
+
+8. print the inserted records
+    > db.products.find().pretty()
+        {
+	        "_id" : ObjectId("60a9feb24ac1fc47e810ff24"),
+	        "name" : "A Book",
+	        "price" : 12.99
+        }
+
+9. insert another record with new field as description
+    > db.products.insertOne({name:"kettle",price:13.99,description:"for heating the water"})
+        {
+	        "acknowledged" : true,
+	        "insertedId" : ObjectId("60a9ff794ac1fc47e810ff25")
+        }
+
+10. finding all the inserted products        
+    > db.products.find().pretty()
+       {
+	        "_id" : ObjectId("60a9feb24ac1fc47e810ff24"),
+	        "name" : "A Book",
+	        "price" : 12.99
+       }
+
+       {
+	        "_id" : ObjectId("60a9ff794ac1fc47e810ff25"),
+	        "name" : "kettle",
+	        "price" : 13.99,
+	        "description" : "for heating the water"
+       }

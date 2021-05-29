@@ -1,0 +1,216 @@
+CRUD OPERATIONS
+
+    CREATE
+        insertOne(data, options)
+        insertMany(data, options)
+
+    READ
+        find(filter,options)    -> it finds all
+        findOne(filter,options) -> it gives the first matching documents
+
+    UPDATE
+        updateOne(filter,data,options)
+        updateMany(filter,data,options)
+        replaceOne(filter,data,options)
+
+    DELETE
+        deleteOne(filter,options)
+        deleteMany(filter,options)
+
+
+CREATE
+------
+> db.flightData.insertOne({
+...     "departureAirport": "MUC",
+...     "arrivalAirport": "SFO",
+...     "aircraft": "Airbus A380",
+...     "distance": 12000,
+...     "intercontinental": true
+...   })
+{
+	"acknowledged" : true,
+	"insertedId" : ObjectId("60aa48b47116d207ee4330ed")
+}
+
+> db.flightData.insertOne({ 
+    "departureAirport": "TXL",     
+    "arrivalAirport": "LHR" 
+    })
+
+{
+	"acknowledged" : true,
+	"insertedId" : ObjectId("60aa4a487116d207ee4330ee")
+}
+
+> db.flightData.insertOne({
+    "departureAirport": "TXL",
+    "arrivalAirport": "LHR", 
+    _id:"txl-lhr-1" 
+    })
+
+{ 
+    "acknowledged" : true, 
+    "insertedId" : "txl-lhr-1" 
+}
+
+
+DELETE
+------
+
+1. Deletes the first occurence of the duplicate - in the above set has 2 departureAirport : "TXL"
+    > db.flightData.deleteOne({departureAirport : "TXL"})
+        { "acknowledged" : true, "deletedCount" : 1 }
+
+2. cannot gaurentee which record will be deleted based on occurence
+    > db.flightData.find().pretty()
+        {
+	        "_id" : ObjectId("60aa48b47116d207ee4330ed"),
+	        "departureAirport" : "MUC",
+	        "arrivalAirport" : "SFO",
+	        "aircraft" : "Airbus A380",
+	        "distance" : 12000,
+	        "intercontinental" : true
+        }
+        {
+        	"_id" : "txl-lhr-1",
+	        "departureAirport" : "TXL",
+	        "arrivalAirport" : "LHR"
+        }
+
+
+UPDATE
+------
+1. updating one document
+    > db.flightData.updateOne({distance: 12000}, {$set: {marker: "delete"} })
+        { "acknowledged" : true, "matchedCount" : 1, "modifiedCount" : 1 }
+
+2. updating multiple document
+    > db.flightData.updateMany({}, {$set: {marker: "toDelete"} })
+        { "acknowledged" : true, "matchedCount" : 2, "modifiedCount" : 2 }
+
+    > db.flightData.find().pretty()
+        {
+        	"_id" : ObjectId("60aa48b47116d207ee4330ed"),
+        	"departureAirport" : "MUC",
+        	"arrivalAirport" : "SFO",
+        	"aircraft" : "Airbus A380",
+        	"distance" : 12000,
+        	"intercontinental" : true,
+        	"marker" : "toDelete"
+        }
+        {
+        	"_id" : "txl-lhr-1",
+        	"departureAirport" : "TXL",
+        	"arrivalAirport" : "LHR",
+        	"marker" : "toDelete"
+        }
+
+
+DELETE
+------
+3. to delete multiple you need to have something generic field to Deletes
+    > db.flightData.deleteMany({marker:"toDelete"})
+        { "acknowledged" : true, "deletedCount" : 2 }
+
+    > db.flightData.find().pretty()
+        record is empty
+
+
+
+INSERT MANY
+-----------
+1. inserting many documents at once
+
+        db.flightData.insertMany([
+        ...   {
+        ...     "departureAirport": "MUC",
+        ...     "arrivalAirport": "SFO",
+        ...     "aircraft": "Airbus A380",
+        ...     "distance": 12000,
+        ...     "intercontinental": true
+        ...   },
+        ...   {
+        ...     "departureAirport": "LHR",
+        ...     "arrivalAirport": "TXL",
+        ...     "aircraft": "Airbus A320",
+        ...     "distance": 950,
+        ...     "intercontinental": false
+        ...   }
+        ... ])
+        {
+        	"acknowledged" : true,
+        	"insertedIds" : [
+        		ObjectId("60aa60907116d207ee4330ef"),
+        		ObjectId("60aa60907116d207ee4330f0")
+        	]
+        }
+
+2. Display all the insered objects
+
+        > db.flightData.find().pretty()
+        {
+        	"_id" : ObjectId("60aa60907116d207ee4330ef"),
+        	"departureAirport" : "MUC",
+        	"arrivalAirport" : "SFO",
+        	"aircraft" : "Airbus A380",
+        	"distance" : 12000,
+        	"intercontinental" : true
+        }
+        {
+        	"_id" : ObjectId("60aa60907116d207ee4330f0"),
+        	"departureAirport" : "LHR",
+        	"arrivalAirport" : "TXL",
+        	"aircraft" : "Airbus A320",
+        	"distance" : 950,
+        	"intercontinental" : false
+        }
+
+
+more about READ
+---------------
+
+1. when there is no record then there is empty records found
+    > db.flightData.find({name: "nitzz"})
+
+2. finding the record 
+    > db.flightData.find({distance: 12000}).pretty()
+        {
+        	"_id" : ObjectId("60aa60907116d207ee4330ef"),
+        	"departureAirport" : "MUC",
+        	"arrivalAirport" : "SFO",
+        	"aircraft" : "Airbus A380",
+        	"distance" : 12000,
+        	"intercontinental" : true
+        }
+
+    > db.flightData.find({aircraft: "Airbus A320"}).pretty()
+        {
+        	"_id" : ObjectId("60aa60907116d207ee4330f0"),
+        	"departureAirport" : "LHR",
+        	"arrivalAirport" : "TXL",
+        	"aircraft" : "Airbus A320",
+        	"distance" : 950,
+        	"intercontinental" : false
+         }
+
+3.  for data aggregation $gt
+    > db.flightData.find({distance: {$gt: 10000}}).pretty()
+        {
+        	"_id" : ObjectId("60aa60907116d207ee4330ef"),
+        	"departureAirport" : "MUC",
+        	"arrivalAirport" : "SFO",
+        	"aircraft" : "Airbus A380",
+        	"distance" : 12000,
+        	"intercontinental" : true
+        }
+
+4. for data aggregation $gt for find first document, pretty() cannot be used
+    > db.flightData.findOne({distance: {$gt: 900}})
+        {
+        	"_id" : ObjectId("60aa60907116d207ee4330ef"),
+        	"departureAirport" : "MUC",
+        	"arrivalAirport" : "SFO",
+        	"aircraft" : "Airbus A380",
+        	"distance" : 12000,
+        	"intercontinental" : true
+        }
